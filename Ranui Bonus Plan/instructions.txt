@@ -1,0 +1,44 @@
+==============================
+ RANUI BONUS PLAN - README
+==============================
+
+ABOUT THE APP:
+---------------
+The Ranui Bonus Plan is a simple clothing allowance tracker designed
+for the Ranui family. It helps manage and monitor how much each child—
+Nikau, Hana, and Tia—spends on clothing throughout the year.
+
+Each child gets a $300 allowance annually. If they have more than
+$50 left at the end of the year, they earn a BONUS activity of their choice.
+
+HOW TO USE:
+-----------
+
+1. RUN THE APP
+   - Open and run `start_menu.py`.
+   - Click "Start Application" to go to the main app.
+
+2. SELECT A CHILD
+   - Choose from Nikau, Hana, or Tia using the dropdown menu.
+
+3. ENTER CLOTHING EXPENSE
+   - Type the amount spent in the input field.
+   - Click "Deduct Amount" to subtract it from the child’s allowance.
+
+4. VIEW ALLOWANCE STATUS
+   - The app shows:
+     - Current balance remaining
+     - Whether the child is on track to receive a bonus
+
+5. EXIT THE APP
+   - Use the "Quit" button on the Start Menu, or close the app window.
+
+RULES & RESTRICTIONS:
+---------------------
+- No child can overspend beyond $300.
+- If a child has over $50 left at year-end, they receive a bonus.
+- Negative values or text inputs are not allowed—only positive numbers.
+- Input is validated to prevent errors and overspending.
+
+
+
