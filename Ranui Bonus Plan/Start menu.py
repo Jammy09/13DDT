@@ -13,7 +13,7 @@ root.geometry("1000x600")
 root.iconbitmap("logo.ico")
 
 # Load and place background
-bg_image = Image.open("Ranui Bonus Plan/background.png").resize((1000, 600))
+bg_image = Image.open("background.png").resize((1000, 600))
 bg_photo = ImageTk.PhotoImage(bg_image)
 bg_label = tk.Label(root, image=bg_photo)
 bg_label.place(relwidth=1, relheight=1)

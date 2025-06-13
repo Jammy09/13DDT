@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-# Data Storage (previously in data_storage.py)
+# Data Storage (in the same file for simplicity)
 children_data = {
     "Nikau": {"balance": 300, "bonus": True},
     "Hana": {"balance": 300, "bonus": True},
@@ -20,7 +20,7 @@ def deduct_amount(child_name, amount):
 def get_child_info(child_name):
     return children_data.get(child_name)
 
-# Main Application
+# Main Application Window
 def launch_main_app():
     def update_display():
         for child in ["Nikau", "Hana", "Tia"]:
@@ -29,34 +29,46 @@ def launch_main_app():
             bonuses[child].config(text="Yes" if info['bonus'] else "No")
 
     def handle_deduction():
+        child = selected_child.get()
+        if child not in children_data:
+            messagebox.showerror("Error", "Please select a valid child.")
+            return
+
         try:
-            child = selected_child.get()
             amount = float(amount_entry.get())
-            if amount < 0:
+            if amount <= 0:
                 raise ValueError
-            result = deduct_amount(child, amount)
-            if result is None:
-                messagebox.showerror("Error", "Invalid child selected.")
-            else:
-                update_display()
         except ValueError:
             messagebox.showerror("Invalid input", "Please enter a valid positive number.")
+            return
 
+        result = deduct_amount(child, amount)
+        if result is not None:
+            update_display()
+        else:
+            messagebox.showerror("Error", "Invalid child selected.")
+
+    # Create main window
     app = tk.Tk()
     app.title("Ranui Bonus Plan - Main")
     app.geometry("600x400")
 
+    # Child Selector
     ttk.Label(app, text="Select Child:").pack(pady=5)
     selected_child = tk.StringVar()
-    child_selector = ttk.Combobox(app, textvariable=selected_child, values=["Nikau", "Hana", "Tia"])
+    selected_child.set("Nikau")  # ✅ Default selection
+    child_selector = ttk.Combobox(app, textvariable=selected_child, values=["Nikau", "Hana", "Tia"], state="readonly")
     child_selector.pack(pady=5)
 
+    # Amount Entry
     ttk.Label(app, text="Enter Amount Spent:").pack(pady=5)
     amount_entry = ttk.Entry(app)
     amount_entry.pack(pady=5)
 
+    # Deduct Button
     ttk.Button(app, text="Deduct", command=handle_deduction).pack(pady=10)
 
+    # Labels for Displaying Balance and Bonus
     ttk.Label(app, text="Current Balances & Bonus Eligibility", font=("Arial", 12, "bold")).pack(pady=10)
     balances = {}
     bonuses = {}
@@ -71,5 +83,4 @@ def launch_main_app():
 
     update_display()
     app.mainloop()
-if __name__ == "__main__":
-    launch_main_app()
+root.mainloop()
