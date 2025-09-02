@@ -3,7 +3,7 @@ from typing import Tuple
 from db import get_db
 from utils import hash_password, verify_password, make_salt
 
-ALLOWED_DOMAINS = {"macleans.school.nz", "macleans.nz"}
+ALLOWED_DOMAINS = {"macleans.school.nz", "macleans.nz" , "student.macleans.school.nz"}
 
 def _domain_ok(email: str) -> bool:
     if "@" not in email: return False

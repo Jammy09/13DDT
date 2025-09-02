@@ -38,7 +38,10 @@ def seed_classes_if_empty():
     n = cur.fetchone()[0]
     if n == 0:
         cur.executemany("INSERT INTO classes(title,teacher,code,house,notes) VALUES(?,?,?,?,?)", [
-            ("Maths Y12", "Ms. Lee", "R2", "Rutherford", "Bring calculator"),
-            ("History Y11", "Mr. Patel", "M5", "Mansfield", "Essay due Friday"),
+            ("Calculas", "Ms. Lee", "H2", "Hillary", "Bring calculator"),
+            ("Business studies", "Mrs. Jones", "M5", "Mansfield", "Internal due Friday"),
+            ("DDT", "Ms. Bharani", "L4", "Rutherford", "Project work"),
+            ("Physics", "Mr. Chang", "T4", "Te Kanawa", "Internal due Thursday"),
+            ("English", "Mrs. Knibbs", "B5", "Batten", "Inernal due Monday")
         ])
         conn.commit()

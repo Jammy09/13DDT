@@ -1,4 +1,3 @@
-
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 from db import get_db
@@ -26,10 +25,10 @@ class ClassesWindow(tk.Toplevel):
 
         btns = ttk.Frame(self); btns.pack(fill="x", padx=10, pady=(0,10))
         ttk.Button(btns, text="Route to selected", command=self._route_selected).pack(side="left")
-        if (self.user or {}).get("role") == "admin":
-            ttk.Button(btns, text="Add", command=self._add).pack(side="right", padx=4)
-            ttk.Button(btns, text="Edit", command=self._edit).pack(side="right", padx=4)
-            ttk.Button(btns, text="Delete", command=self._delete).pack(side="right", padx=4)
+        # Remove the admin check so all users see the buttons:
+        ttk.Button(btns, text="Add", command=self._add).pack(side="right", padx=4)
+        ttk.Button(btns, text="Edit", command=self._edit).pack(side="right", padx=4)
+        ttk.Button(btns, text="Delete", command=self._delete).pack(side="right", padx=4)
 
         self._refresh()
 
