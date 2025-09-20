@@ -1,11 +1,11 @@
 """
-auth.py
----------
-Handles authentication logic:
-- Checking allowed email domains
-- Seeding an admin account if database is empty
-- Registering new users
-- Logging in users
+User authentication and registration module.
+
+Handles:
+- Domain validation
+- Admin seeding (if DB empty)
+- User registration
+- User login
 """
 
 from typing import Tuple
@@ -22,34 +22,40 @@ ALLOWED_DOMAINS = {
 
 def _domain_ok(email: str) -> bool:
     """
-    Check if the email has an allowed domain.
+    Check if the email belongs to an allowed domain.
+
+    Args:
+        email (str): Email address to validate.
+
+    Returns:
+        bool: True if the domain is allowed, False otherwise.
     """
     if "@" not in email:
         return False
+    domain = email.split("@", 1)[1].lower()
+    return domain in ALLOWED_DOMAINS
 
-    # Extract domain after '@' and validate
-    return email.split("@", 1)[1].lower() in ALLOWED_DOMAINS
 
-
-def seed_admin_if_empty():
+def seed_admin_if_empty() -> None:
     """
-    Create a default admin user if the database is empty.
+    Create a default admin user if the users table is empty.
     """
     conn = get_db()
     cur = conn.cursor()
 
-    # Count users in DB
+    # Count existing users
     cur.execute("SELECT COUNT(*) FROM users")
-    n = cur.fetchone()[0]
+    user_count = cur.fetchone()[0]
 
-    if n == 0:
-        # Create admin with default password
+    if user_count == 0:
+        # Create admin credentials
         salt = make_salt()
         pwhash = hash_password("admin123", salt)
 
+        # Insert default admin into the database
         cur.execute(
             """
-            INSERT INTO users(email, name, role, salt, pwhash)
+            INSERT INTO users (email, name, role, salt, pwhash)
             VALUES (?, ?, ?, ?, ?)
             """,
             ("admin@macleans.school.nz", "Admin", "admin", salt, pwhash),
@@ -57,58 +63,87 @@ def seed_admin_if_empty():
         conn.commit()
 
 
-def register_user(email: str, name: str, password: str) -> Tuple[bool, str]:
+def register_user(
+    email: str,
+    name: str,
+    password: str,
+    role: str = "student",
+) -> Tuple[bool, str]:
     """
-    Register a new user.
-    Returns (success, message).
+    Register a new user in the database.
+
+    Args:
+        email (str): User's email address.
+        name (str): User's display name.
+        password (str): Plaintext password to hash.
+        role (str): Role of the user ("admin" or "student").
+
+    Returns:
+        Tuple[bool, str]: (success flag, message).
     """
+    email = email.strip().lower()
+
+    # Validate email domain
     if not _domain_ok(email):
-        return False, "Registration failed: Invalid email domain."
+        return False, "Email must be a Macleans address."
 
-    conn = get_db()
-    cur = conn.cursor()
+    # Restrict role to valid options
+    if role not in ("admin", "student"):
+        role = "student"
 
-    # Ensure no duplicate account
-    cur.execute("SELECT id FROM users WHERE email = ?", (email,))
-    if cur.fetchone():
-        return False, "Registration failed: User already exists."
-
-    # Salt + password hash
+    # Generate salt and hashed password
     salt = make_salt()
     pwhash = hash_password(password, salt)
 
-    # Insert into DB
-    cur.execute(
-        """
-        INSERT INTO users(email, name, role, salt, pwhash)
-        VALUES (?, ?, ?, ?, ?)
-        """,
-        (email, name, "user", salt, pwhash),
-    )
-    conn.commit()
+    try:
+        conn = get_db()
+        cur = conn.cursor()
 
-    return True, "Registration successful!"
+        # Attempt to insert user into DB
+        cur.execute(
+            """
+            INSERT INTO users (email, name, role, salt, pwhash)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (email, name.strip(), role, salt, pwhash),
+        )
+        conn.commit()
+        return True, "Registered."
+    except Exception:
+        # Likely a unique constraint failure (duplicate email)
+        return False, "That email is already registered."
 
 
-def login_user(email: str, password: str) -> Tuple[bool, str, str]:
+def login_user(email: str, password: str):
     """
-    Attempt login.
-    Returns (success, message, name).
+    Authenticate a user by email and password.
+
+    Args:
+        email (str): User's email.
+        password (str): Plaintext password to verify.
+
+    Returns:
+        Tuple[dict | None, str | None]:
+            - If successful: (user dict, None)
+            - If failure: (None, error message)
     """
     conn = get_db()
     cur = conn.cursor()
 
-    # Fetch user data
-    cur.execute("SELECT name, salt, pwhash FROM users WHERE email = ?", (email,))
+    # Fetch user record
+    cur.execute("SELECT * FROM users WHERE email = ?", (email.strip().lower(),))
     row = cur.fetchone()
 
     if not row:
-        return False, "Login failed: User not found.", ""
+        return None, "No such user."
 
-    name, salt, pwhash = row
+    # Verify password using stored salt + hash
+    if verify_password(password, row["salt"], row["pwhash"]):
+        return {
+            "id": row["id"],
+            "email": row["email"],
+            "name": row["name"],
+            "role": row["role"],
+        }, None
 
-    # Check password
-    if verify_password(password, salt, pwhash):
-        return True, "Login successful!", name
-
-    return False, "Login failed: Incorrect password.", ""
+    return None, "Incorrect password."
