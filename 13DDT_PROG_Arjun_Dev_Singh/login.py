@@ -172,11 +172,15 @@ class LoginWindow:
             messagebox.showerror("Register failed", msg)
             return
 
-        ok, err_msg = register_user(email, name, password, role="student")
-        if err_msg:
-            messagebox.showerror("Register failed", err_msg)
+        # Expect register_user to return (ok: bool, msg: str)
+        ok, msg = register_user(email, name, password, role="student")
+
+        if not ok:
+            # Only show an error if registration failed
+            messagebox.showerror("Register failed", msg or "Unknown error during registration.")
             return
 
+        # Success
         messagebox.showinfo("Registered", "Registered successfully. You can sign in now.")
         self.nb.select(0)  # Switch to Sign in tab
 
