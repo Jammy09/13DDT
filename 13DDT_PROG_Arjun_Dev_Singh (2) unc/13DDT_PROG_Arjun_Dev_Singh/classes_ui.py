@@ -149,8 +149,7 @@ class ClassesWindow(tk.Toplevel):
             return
         if not messagebox.askyesno("Delete", "Delete selected class?"):
             return
-        db = get_db()                     # get one connection
-        cur = db.cursor()
-        cur.execute("DELETE FROM classes WHERE id=?", (sel[0],))
-        db.commit()                       # commit on the same connection
+        cur = get_db().cursor()
+        cur.execute("DELETE FROM classes")
+        get_db().commit()
         self._refresh()
